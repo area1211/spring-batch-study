@@ -25,17 +25,24 @@ public class InsertRunner implements ApplicationRunner {
     Job readCSVFilesJob;
 
     @Autowired
+    Job readMultipleFileWriteDBJob;
+
+    @Autowired
     JobLauncher jobLauncher;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
 
+        String filePath = "input/10000 Sales Records.csv"; // input/inputData.csv
+
         JobParameters jobParameters = new JobParametersBuilder()
                 .addString("JobID", String.valueOf(System.currentTimeMillis()))
-                .addString("inputFilePath", "input/inputData.csv")
+                .addString("inputFilePath", filePath)
                 .toJobParameters();
 
-        jobLauncher.run(readCSVFilesJob, jobParameters);
+//        jobLauncher.run(readCSVFilesJob, jobParameters);
+        jobLauncher.run(readMultipleFileWriteDBJob, jobParameters);
+//        jobLauncher.run(inactiveUserJob, jobParameters);
 
 //        IntStream.rangeClosed(101, 238).forEach(index ->
 //                userRepository.save(User.builder()

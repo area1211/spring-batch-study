@@ -39,13 +39,13 @@ public class RangePartitioner implements Partitioner {
 
             log.info("\nStarting : Thread" + i);
             log.info("fromId : " + fromId);
-            log.info("toId : " +toId);
+            log.info("toId : " + toId);
 
             context.putInt("fromId", fromId);
             context.putInt("toId", toId);
             context.putString("name", "Thread" + i);
 
-            map.put("partition"+i,context);
+            map.put("partition" + i, context); // step execution 의 이름과 context 를 쌍으로 넣어준다.
             fromId = toId + 1;
             toId += range;
 
