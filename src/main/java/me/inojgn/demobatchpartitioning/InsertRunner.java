@@ -17,35 +17,27 @@ import java.util.stream.IntStream;
 
 @Component
 public class InsertRunner implements ApplicationRunner {
-    @Autowired
-    private UserRepository userRepository;
 
     @Autowired
     Job inactiveUserJob;
 
-//    @Autowired
-//    Job testUserJob;
+    @Autowired
+    Job readCSVFilesJob;
 
     @Autowired
     JobLauncher jobLauncher;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-//        List<User> all = userRepository.findAll();
-//        System.out.println("==================");
-//        System.out.println(all.size());
-//        System.out.println("==================");
-
-//        List<User> usersById = userRepository.findUsersById(1l, 50l);
-//        System.out.println(usersById.size());
 
         JobParameters jobParameters = new JobParametersBuilder()
-                .addLong("time", System.currentTimeMillis())
+                .addString("JobID", String.valueOf(System.currentTimeMillis()))
+                .addString("inputFilePath", "input/inputData.csv")
                 .toJobParameters();
 
-        jobLauncher.run(inactiveUserJob, jobParameters);
+        jobLauncher.run(readCSVFilesJob, jobParameters);
 
-//        IntStream.rangeClosed(201, 301).forEach(index ->
+//        IntStream.rangeClosed(101, 238).forEach(index ->
 //                userRepository.save(User.builder()
 //                        .name("kinguser_"+index)
 //                        .password("test_"+index)

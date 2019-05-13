@@ -25,21 +25,21 @@ import static org.junit.Assert.assertEquals;
 //@AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2)
 public class UserJobTest {
 
-    @Autowired
-    private JobLauncherTestUtils jobLauncherTestUtils;
+//    @Autowired
+//    private JobLauncherTestUtils jobLauncherTestUtils;
 
     @Autowired
     UserRepository userRepository;
 
     @Test
     public void 파티셔닝_테스트() throws Exception {
-//        IntStream.rangeClosed(1, 100).forEach(index ->
-//                userRepository.save(User.builder()
-//                        .name("user_"+index)
-//                        .password("test_"+index)
-//                        .email("user_"+index+"@gmail.com")
-//                        .createdDate(LocalDateTime.now())
-//                        .build()));
+        IntStream.rangeClosed(101, 238).forEach(index ->
+                userRepository.save(User.builder()
+                        .name("user_"+index)
+                        .password("test_"+index)
+                        .email("user_"+index+"@naver.com")
+                        .createdDate(LocalDateTime.now())
+                        .build()));
 
 //        List<User> all = userRepository.findAll();
 //        for (User u :
@@ -50,7 +50,7 @@ public class UserJobTest {
 //        System.out.println("ListSIze : " + all.size());
 
 
-        JobExecution jobExecution = jobLauncherTestUtils.launchJob();
+//        JobExecution jobExecution = jobLauncherTestUtils.launchJob();
 
 
 //        assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());

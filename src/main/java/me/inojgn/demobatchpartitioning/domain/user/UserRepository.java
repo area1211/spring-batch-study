@@ -12,4 +12,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("select u from User u where u.idx >= :fromId and u.idx <= :toId")
     List<User> findUsersById(@Param("fromId") Long fromId, @Param("toId") Long toId);
+
+//    @Query("select count(*) from User")
+
 }
