@@ -33,15 +33,16 @@ public class InsertRunner implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {
 
-        String filePath = "input/10000 Sales Records.csv"; // input/inputData.csv
+        String filePath = "input/testdata.txt"; // input/inputData.csv
+//        String filePath = "classpath:input/100000 Sales Records.csv"; // input/inputData.csv
 
         JobParameters jobParameters = new JobParametersBuilder()
                 .addString("JobID", String.valueOf(System.currentTimeMillis()))
                 .addString("inputFilePath", filePath)
                 .toJobParameters();
 
-//        jobLauncher.run(readCSVFilesJob, jobParameters);
-        jobLauncher.run(readMultipleFileWriteDBJob, jobParameters);
+        jobLauncher.run(readCSVFilesJob, jobParameters);
+//        jobLauncher.run(readMultipleFileWriteDBJob, jobParameters);
 //        jobLauncher.run(inactiveUserJob, jobParameters);
 
 //        IntStream.rangeClosed(101, 238).forEach(index ->

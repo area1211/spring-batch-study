@@ -40,10 +40,10 @@ import java.net.MalformedURLException;
 public class PartitionFileJobConfig {
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
-    private final EntityManagerFactory entityManagerFactory;
 
+    private final Step splitMultiResourceStep;
     private final JpaItemWriter<SalesRecord> testJpaItemWriter;
-//    private final ResourceLoader resourceLoader;
+
 
     @Bean
     public Job readMultipleFileWriteDBJob(TestJobListener testJobListener) throws MalformedURLException {
@@ -51,7 +51,8 @@ public class PartitionFileJobConfig {
                 .get("readMultipleFileWriteDBJob")
 //                .incrementer(new RunIdIncrementer()) // Entity 타입의 Id 어노테이션과 함께 GenerationType.IDENTITY 때문에 필요 없는 것 같은데..?(뇌피셜)
                 .listener(testJobListener)
-                .start(masterStep())
+                .start(splitMultiResourceStep)
+                .next(masterStep())
                 .build();
     }
 
@@ -64,13 +65,13 @@ public class PartitionFileJobConfig {
         Resource[] resources = null;
         try {
 //            resources = resolver.getResources("/*.csv"); //new FileSystemResource(inputFilePath)
-//            resources = resolver.getResources("classpath:input/DemoData_*.csv"); // classpath:mappers/embed/*.xml
-            resources = resolver.getResources("file:/Users/jeong-inho/IdeaProjects/hackday/demobatchpartitioning/input/DemoData_*.csv"); // classpath:mappers/embed/*.xml
+//            resources = resolver.getResources("classpath:input/TestData_*.csv"); // classpath:mappers/embed/*.xml
+            resources = resolver.getResources("file:input/split/TestData_*.csv"); // classpath:mappers/embed/*.xml, /Users/jeong-inho/IdeaProjects/hackday/demobatchpartitioning/
         } catch (IOException e) {
             e.printStackTrace();
         }
         partitioner.setResources(resources);
-        partitioner.partition(10);
+        partitioner.partition(20);
         return partitioner;
     }
 
@@ -79,6 +80,7 @@ public class PartitionFileJobConfig {
     public Step masterStep() throws MalformedURLException {
         return stepBuilderFactory.get("masterStep")
                 .partitioner("stepTest", partitioner())
+//                .gridSize(20)
                 .step(stepTest())
                 .taskExecutor(threadPoolTaskExecutor())
                 .build();
@@ -87,7 +89,7 @@ public class PartitionFileJobConfig {
     @Bean
     public Step stepTest() throws MalformedURLException {
         return stepBuilderFactory.get("stepTest")
-                .<SalesRecord, SalesRecord>chunk(100)
+                .<SalesRecord, SalesRecord>chunk(500)
                 .reader(personItemReader(null))
                 .writer(testJpaItemWriter)
                 .build();
@@ -96,9 +98,11 @@ public class PartitionFileJobConfig {
     @Bean
     public ThreadPoolTaskExecutor threadPoolTaskExecutor() {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
-        taskExecutor.setMaxPoolSize(10);
-        taskExecutor.setCorePoolSize(10);
-        taskExecutor.setQueueCapacity(10);
+        // corePoolSize와 maxPoolSize를 같게 하면 결국 고정 크기 스레드 풀을 생성하게 된다.
+        int size = 20;
+        taskExecutor.setMaxPoolSize(size); // 스레드풀에서 관리하는 최대 스레드 수
+        taskExecutor.setCorePoolSize(size); // 스레드가 증가한 후 사용되지 않은 스레드를 스레드 풀에서 제거할 때 최소한으로 유지해야할 수
+        taskExecutor.setQueueCapacity(size);
         taskExecutor.afterPropertiesSet();
         return taskExecutor;
     }
