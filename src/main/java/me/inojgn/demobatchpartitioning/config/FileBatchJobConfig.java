@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import me.inojgn.demobatchpartitioning.domain.QueryKeyword;
 import me.inojgn.demobatchpartitioning.domain.sales.SalesRecord;
 import me.inojgn.demobatchpartitioning.listener.TestJobListener;
+import me.inojgn.demobatchpartitioning.processor.GroupProcessor;
+import me.inojgn.demobatchpartitioning.reader.GroupReader;
 import me.inojgn.demobatchpartitioning.writer.ConsoleItemWriter;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -29,6 +31,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.task.TaskExecutor;
 
 import javax.persistence.EntityManagerFactory;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -43,7 +46,8 @@ public class FileBatchJobConfig {
     private final TaskExecutor taskExecutor;
 
     private final ResourceLoader resourceLoader;
-
+    private final GroupReader groupReader;
+    private final GroupProcessor groupProcessor;
 
     private static final String[] HEADER = {"ContextNum", "Keyword", "Context"};
 //    private static final String[] HEADER = {"Region", "Country", "Item_Type", "Sales_Channel", "Order_Priority", "Order_Date", "Order_ID", "Ship_Date", "Units_Sold", "Unit_Price", "Unit_Cost", "Total_Revenue", "Total_Cost", "Total_Profit"};
@@ -55,7 +59,8 @@ public class FileBatchJobConfig {
                 .get("readCSVFilesJob")
                 .incrementer(new RunIdIncrementer()) // Entity 타입의 Id 어노테이션과 함께 GenerationType.IDENTITY 때문에 필요 없는 것 같은데..?(뇌피셜)
                 .listener(testJobListener)
-                .start(step1(null))
+//                .start(step1(null))
+                .start(groupingTestStep())
                 .build();
     }
 
@@ -76,6 +81,16 @@ public class FileBatchJobConfig {
                 .writer(queryKeywordJpaItemWriter())
                 .taskExecutor(threadPoolTaskExecutor)
 //                .throttleLimit(10)
+                .build();
+    }
+
+    @Bean
+    public Step groupingTestStep() {
+        return stepBuilderFactory.get("groupingTestStep")
+                .<List<QueryKeyword>, List<QueryKeyword>>chunk(10)
+                .reader(groupReader)
+                .processor(groupProcessor)
+                .writer(consoleItemWriter())
                 .build();
     }
 
@@ -143,7 +158,7 @@ public class FileBatchJobConfig {
     }
 
     @Bean
-    public ConsoleItemWriter<SalesRecord> writer() {
+    public ConsoleItemWriter<List<QueryKeyword>> consoleItemWriter() {
         return new ConsoleItemWriter<>();
     }
 
